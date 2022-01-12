@@ -5,12 +5,25 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Games' shop</title>
+    <hr>    
+    <h4>List of games</h4>
+    <ul id="games"></ul>  
+
+
 </head>
 <body>
     <!-- importing AXIOS to consuming API on front-end --> 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>axios.get("http://localhost:45678/games").then(response => {
+        var games = response.data;
+        var list = document.getElementById("games");
+
+        games.forEach(game => {
+            var item = document.createElement("li");
+            item.innerHTML = game.id + " - " + game.title + " - $" + game.price;
+            list.appendChild(item);
+        });
         console.log(response);
     }).catch(error =>{
         console.log(error);

@@ -31,6 +31,21 @@ var DB = {
             year: 2012,
             price: 20
         },
+    ],
+
+    users: [
+        {
+            id: 1,
+            name: "Larissa",
+            email: "larissa@gmail.com",
+            password: "larissa123"
+        },
+        {
+            id: 2,
+            name: "Luana",
+            email: "luanaa@gmail.com",
+            password: "luana123"
+        }
     ]
 }
 
@@ -119,7 +134,33 @@ app.put("/game/:id", (req, res) => {
             res.sendStatus(404);
         }
     }
-})
+});
+
+app.post("/auth", (req, res) => {
+    var {email, password} = req.body;
+
+    if(email != undefined){
+       var user = DB.users.find(u => u.email == email);
+        
+        if(user != undefined){
+            if(user.password == password){
+                res.status = 200;
+                res.json({token: "Fake token!"})
+            }else{
+                res.status = 401;
+                res.json({err: "Invalid credencials"})
+            }
+
+        }else{
+            res.status = 404;
+            res.json({err: "The email doesn't exist. "})
+        }
+
+    }else{
+        res.status = 400;
+        res.json({err: "The email sent is invalid. "})
+    }
+});
 
 
 app.listen(45678, () => {

@@ -4,10 +4,38 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 
+const JWTSecret = "djkshahjksdajksdhasjkdhasjkasasasasasasakd";
 app.use(cors());
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+function auth(req, res, next){
+
+    const authToken = req.headers['authorization'];
+
+    if(authToken != undefined){
+        const bearer = authToken.split(' ');
+        var token = bearer[1];
+
+        jwt.verify(token, JWTSecret, (err, data) => {
+            if(err){
+                res.status(401);
+                res.json({err: "Token invalid!"})
+            }else{
+                req.token = token;
+                req.loggedUser = {id: data.id, email: data.email}
+                console.log(data)
+                next();
+            }
+        })
+    }else{
+        res.status(401);
+        res.json({err: "token invalid!"})
+    }
+    console.log(authToken);
+}
+
 
 var DB = {
     
@@ -39,7 +67,7 @@ var DB = {
             id: 1,
             name: "Larissa",
             email: "larissa@gmail.com",
-            password: "larissa123"
+            password: "12345678"
         },
         {
             id: 2,
@@ -50,7 +78,7 @@ var DB = {
     ]
 }
 
-app.get("/games", (req, res) => {
+app.get("/games", auth, (req, res) => {
     res.statusCode = 200; // One of pillars to build Restful api
     res.json(DB.games)
 });
@@ -137,29 +165,36 @@ app.put("/game/:id", (req, res) => {
     }
 });
 
-app.post("/auth", (req, res) => {
+app.post("/auth",(req, res) => {
+
     var {email, password} = req.body;
 
     if(email != undefined){
-       var user = DB.users.find(u => u.email == email);
-        
+
+        var user = DB.users.find(u => u.email == email);
         if(user != undefined){
             if(user.password == password){
-                res.status(200);
-                res.json({token: "Fake token!"})
+                jwt.sign({id: user.id, email: user.email},JWTSecret,{expiresIn:'48h'},(err, token) => {
+                    if(err){
+                        res.status(400);
+                        res.json({err:"Internal error server"});
+                    }else{
+                        res.status(200);
+                        res.json({token: token});
+                    }
+                })
             }else{
                 res.status(401);
-                res.json({err: "Invalid credencials"})
+                res.json({err: "Invalid credentials!"});
             }
-
         }else{
             res.status(404);
-            res.json({err: "The email doesn't exist. "})
+            res.json({err: "Email sent doensn't exist in our database!"});
         }
 
     }else{
         res.status(400);
-        res.json({err: "The email sent is invalid. "})
+        res.send({err: "O E-mail enviado é inválido"});
     }
 });
 

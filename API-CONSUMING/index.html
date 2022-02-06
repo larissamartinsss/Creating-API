@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
     <title>Games' shop</title>
     <hr>    
+    <h2>Login</h2>
+    <input type="text" name="email" id="email" placeholder="youremail@something.com"><br>
+    <input type="text" name="password" id="password" placeholder="**********">
+    <button onclick="login()">Enter</button>
+
     <h4>List of games</h4>
-    <button><a href="file:///C:/Users/larissas/OneDrive%20-%20Capgemini/Documents/my%20courses/NodeJs-Curso/Projetos/Creating-API/API-CONSUMING/index.html">Refresh</a></button>
+    <button><a href="D:\ESTUDOS\GitHub\Creating-API\API-CONSUMING">Refresh</a></button>
     <ul id="games"></ul>  
     <hr>
     <h4>New gane</h4>
@@ -20,15 +26,43 @@
     <input type="text" name="idEdit" id="idEdit" placeholder="id" readonly><br>
     <input type="text" name="titleEdit" id="titleEdit" placeholder="title"><br>
     <input type="number" name="yearEdit" id="yearEdit" placeholder="year"><br>
-    <input type="price" name="priceEdit" id="priceEdit" placeholder="price"><br>
     <button type="button" onclick="updateGame()">Edit</button>
+    <input type="price" name="priceEdit" id="priceEdit" placeholder="price"><br>
 
 </head>
 <body>
     <!-- importing AXIOS to consuming API on front-end --> 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
+    
     <script>
+
+        function login(){
+            var emailField = document.getElementById("email");
+            var passwordField = document.getElementById("password");
+
+            var email = emailField.value;
+            var password = passwordField.value;
+
+            axios.post("http://localhost:45678/auth", {
+                email,
+                password
+            }).then( res => {
+                var token = res.data.token;
+                localStorage.setItem("token", token);
+                // Recalculating token 
+               axiosConfig.headers.Authorization = "Bearer " + localStorage.getItem("token");
+
+                alert("Logged"+ token)
+            }).catch(err => {
+                alert("Invalid login...")
+            })
+        }
+
+        var axiosConfig = {
+            headers: { // Bearer is the type's token. 
+                Authorization: "Bearer " + localStorage.getItem("token")
+               }
+        }
 
     function createGame () {
         var titleInput = document.getElementById("title");
@@ -41,7 +75,7 @@
             price: priceInput.value,
         }
 
-        axios.post("http://localhost:45678/game", game).then( response =>{
+        axios.post("http://localhost:45678/game", game, axiosConfig).then( response =>{
 
             if(response.status == 200){
                 alert("Registered game!")
@@ -53,7 +87,7 @@
 
     function deleteGame(ListItem){
         var id = ListItem.getAttribute("data-id");
-        axios.delete("http://localhost:45678/game/"+id).then(response => {
+        axios.delete("http://localhost:45678/game/"+id, axiosConfig).then(response => {
             alert("Game deleted!").catch(err => {
                 console.log(err);
             })
@@ -87,7 +121,7 @@
 
         var id = idInput.value;
 
-        axios.put("http://localhost:45678/game/"+id, game).then( response =>{
+        axios.put("http://localhost:45678/game/"+id, game, axiosConfig).then( response =>{
 
             if(response.status == 200){
                 alert("Updated game!")
@@ -102,7 +136,7 @@
 
 
 
-    axios.get("http://localhost:45678/games").then(response => {
+    axios.get("http://localhost:45678/games", axiosConfig).then(response => {
         var games = response.data;
         var list = document.getElementById("games");
 

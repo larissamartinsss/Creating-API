@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 
 function auth(req, res, next){
 
-    const authToken = req.headers['authorization'];
+    const authToken = req.headers['authorization']; 
 
     if(authToken != undefined){
         const bearer = authToken.split(' ');

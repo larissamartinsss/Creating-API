@@ -47,9 +47,11 @@ Example:
 ### POST /auth
 This endpoint is responsible to do login process.
 #### Parameters
-User Id
-User email: The user email registered. 
-User password: The user passoword registered. 
+Id
+
+email: The user email registered. 
+
+password: The user passoword registered. 
 
 exemple:
 ```
